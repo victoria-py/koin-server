@@ -1,6 +1,4 @@
-# Koin-Server 정복하기
-
-## Mcard 삭제 시퀀스
+# Mcard 삭제 시퀀스
 ![image](https://t1-beta.daumcdn.net/blockadmintest/victoria_test/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202021-03-05%20%EC%98%A4%ED%9B%84%203.19.11.png)
 
 ### 구성요소
@@ -34,3 +32,13 @@
     - **mcards-db**에서 카드 데이터 제거
     - 트랜잭션 콜백 있을 시, Callback_queue에 Enqueue
     - TMS도, 해당 queue에 Enqueue
+
+### QnA
+1. mcard_single_burn_queue의 `single`이 왜 들어갔나요?
+- 기존에 mcard_create, transfer가 있었는데 구조를 고치면서 single(하나씩 한다는 의미에서)을 붙여서 워커가만들어짐. 기존 워커(single이 들어가지 않은 워커)는 더이상 사용되지 않음
+
+2. transaction 트레이서는 블록체인 노드를 어떤 식으로 트레이스 하는 걸까요?? 
+위 플로우에서는 노드에서 트레이서 방향으로 read_transaction 이라 되어있는데, burner가 블록체인 노드에 트랜잭션을 보낼때 트레이서에도 token_id같은 걸 기록해두고 몇 초마다 체크하는건지, 이것도 콜백처럼 작업이 끝났을때 트레이서에 트리거를 줘서 트레이싱되는 건지 궁금
+- tracer가 마지막으로 trace된 block_number를 가지고 있음
+- 트레이싱 되어야 할때, 이전의 바라봤던 blcok_number의 다음 번호를 바라보고 노드에서 지정된 unit_time마다 노드에서 block 정보를 가져옴(무한루프 방식)
+- [참고링크](https://github.daumkakao.com/blockchain-tf/koin-server/blob/master/workers/transaction/transaction_tracer.py#L124)
